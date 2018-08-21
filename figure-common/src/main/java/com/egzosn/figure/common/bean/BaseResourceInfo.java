@@ -8,6 +8,7 @@ package com.egzosn.figure.common.bean;
  */
 public class BaseResourceInfo {
 
+    public static final String SEPARATOR = "/";
     /**
      * 文件唯一标识信息
      */
@@ -50,6 +51,9 @@ public class BaseResourceInfo {
     }
 
     public String getPath() {
+        if (null != path && !"".equals(path) && !path.endsWith(SEPARATOR)){
+            path += SEPARATOR;
+        }
         return path;
     }
 
@@ -72,4 +76,9 @@ public class BaseResourceInfo {
     public void setAddition(String addition) {
         this.addition = addition;
     }
+
+    public String pathname(){
+        return String.format("%s/%s", getPath(), getFileName());
+    }
+
 }

@@ -5,6 +5,7 @@ import com.egzosn.figure.common.bean.ProcessingResults;
 import com.egzosn.figure.common.bean.ResourceInfo;
 
 import java.io.InputStream;
+import java.util.Map;
 
 
 /**
@@ -23,8 +24,9 @@ public interface FigureBedService {
 
     /**
      * 授权
+     * @return 处理结果
      */
-    void auth();
+     ProcessingResults auth();
 
     /**
      * 存储
@@ -42,8 +44,16 @@ public interface FigureBedService {
 
     /**
      * 获取资源文件
+     * @param body 资源信息
      * @return 资源文件
      */
-    ResourceInfo retrieveResource(BaseResourceInfo body);
+    ProcessingResults retrieveResource(BaseResourceInfo body);
+
+    /**
+     * 删除
+     * @param body 资源信息
+     * @return 处理结果
+     */
+    ProcessingResults delete(BaseResourceInfo body);
 
 }

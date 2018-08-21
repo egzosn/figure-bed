@@ -2,6 +2,9 @@ package com.egzosn.figure.ftp.api;
 
 import com.egzosn.figure.common.api.FigureBedConfigStorage;
 
+
+import static com.egzosn.figure.common.bean.BaseResourceInfo.SEPARATOR;
+
 /**
  * FTP服务配置
  * @author egan
@@ -16,7 +19,7 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
     /**
      *  FTP服务器端口
      */
-    private int port;
+    private int port = 21;
     /**
      * FTP登录账号
      */
@@ -77,6 +80,9 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
      * @return 编码格式
      */
     public String getEncoding() {
+        if (null == encoding || "".equals(encoding)){
+            return "GBK";
+        }
         return encoding;
     }
 
@@ -117,6 +123,17 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
      * @return 资源库，服务器存放资源目录，空间名称等
      */
     public String getDataBase() {
+        if (null == workingDirectory){
+            return "";
+        }
+        if ( !workingDirectory.endsWith(SEPARATOR)){
+            workingDirectory +=  SEPARATOR;
+        }
+
+        if ( !workingDirectory.startsWith(SEPARATOR)){
+            workingDirectory = SEPARATOR + workingDirectory + SEPARATOR;
+        }
+
         return workingDirectory;
     }
 
