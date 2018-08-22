@@ -35,7 +35,11 @@ public class FTPFigureBedService implements FigureBedService {
      */
     private FTPClient ftpClient;
 
-//    private String
+    public FTPClient getFtpClient() {
+        return ftpClient;
+    }
+
+    //    private String
 
     public FTPFigureBedService(FigureBedConfigStorage configStorage) {
         setConfigStorage(configStorage);
@@ -51,19 +55,30 @@ public class FTPFigureBedService implements FigureBedService {
 
     public void setConfigStorage(FigureBedConfigStorage configStorage) {
         this.configStorage = configStorage;
+        logger.debug(configStorage.toString());
         ftpClient = new FTPClient();
         try {
             ftpClient.connect(configStorage.getHostname(), configStorage.getPort());
             if (SUCCESS.getCode() != auth().getCode()) {
                 throw new FigureException(SERVER_ERROR.getCode(), "ftp 远程连接登录异常：账号或密码错误");
             }
-            ((FTPFigureBedConfigStorage)configStorage).setWorkingDirectory(ftpClient.printWorkingDirectory() + configStorage.getDataBase() );
+
+            String workingDirectory = ftpClient.printWorkingDirectory();
+            if (!configStorage.getDataBase().startsWith(workingDirectory)){
+                ((FTPFigureBedConfigStorage)configStorage).setWorkingDirectory(workingDirectory + configStorage.getDataBase() );
+            }
+            ftpClient.setControlEncoding(configStorage.getEncoding());
+            if (!configStorage.isPassiveMode()){
+                ftpClient.enterLocalPassiveMode();
+            }
 
         } catch (IOException e) {
             throw new FigureException(SERVER_ERROR.getCode(), String.format("ftp 远程连接异常：%s", e.getMessage()), e);
         }
 
     }
+
+
 
     /**
      * 授权
@@ -85,7 +100,6 @@ public class FTPFigureBedService implements FigureBedService {
      */
     public ProcessingResults store(ResourceInfo body) {
 
-        ftpClient.enterLocalPassiveMode();
         InputStream in = new ByteArrayInputStream(body.getFile());
         String pathname = configStorage.getDataBase() + body.getPath();
         createDirectory(pathname);
@@ -93,7 +107,6 @@ public class FTPFigureBedService implements FigureBedService {
         String remote = null;
         try {
             remote = new String(body.getFileName().getBytes(configStorage.getEncoding()), "iso-8859-1");
-            ftpClient.enterLocalPassiveMode();
             if (ftpClient.storeFile(remote, in)) {
                 logger.debug(body.getFileName() + "上传文件成功！");
                 return ProcessingResults.SUCCESS;

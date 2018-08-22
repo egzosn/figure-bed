@@ -47,4 +47,18 @@ public interface FigureBedConfigStorage {
      * @return 编码格式
      */
     String getEncoding();
+
+    /**
+     * 是否为被动模式 true 是，否则主动
+     * @return 是否为被动模式
+     */
+    boolean isPassiveMode();
+
+    /**
+     * 超时时间
+     * @return 超时时间
+     */
+    int getClientTimeout();
+
+
 }

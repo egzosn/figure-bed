@@ -42,6 +42,36 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
      */
     private String accessAddress;
 
+    /**
+     *  是否为被动模式 true 是，否则主动， 默认false
+     */
+    private boolean passiveMode;
+
+    /**
+     * 超时时间
+     */
+    private int clientTimeout;
+    /**
+     * 线程数
+     */
+    private int threaNum;
+    /**
+     * 文件传送类型
+     * 0=ASCII_FILE_TYPE（ASCII格式） 1=EBCDIC_FILE_TYPE 2=LOCAL_FILE_TYPE（二进制文件）
+     */
+    private int transferFileType = 2;
+
+    /**
+     * 重新连接时间
+     */
+    private int retryTimes = 1200;
+    /**
+     * 缓存大小
+     */
+    private int bufferSize = 1024;
+
+
+
     public String getHostname() {
         return hostname;
     }
@@ -86,9 +116,37 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
         return encoding;
     }
 
+
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
+
+    /**
+     * 是否为被动模式 true 是，否则主动
+     *
+     * @return 是否为被动模式
+     */
+    public boolean isPassiveMode() {
+        return passiveMode;
+    }
+
+    /**
+     * 超时时间
+     *
+     * @return 超时时间
+     */
+    public int getClientTimeout() {
+        return clientTimeout;
+    }
+
+    public void setClientTimeout(int clientTimeout) {
+        this.clientTimeout = clientTimeout;
+    }
+
+    public void setPassiveMode(boolean passiveMode) {
+        this.passiveMode = passiveMode;
+    }
+
 
     public String getWorkingDirectory() {
         return workingDirectory;
@@ -131,11 +189,61 @@ public class FTPFigureBedConfigStorage implements FigureBedConfigStorage {
         }
 
         if ( !workingDirectory.startsWith(SEPARATOR)){
-            workingDirectory = SEPARATOR + workingDirectory + SEPARATOR;
+            workingDirectory = SEPARATOR + workingDirectory ;
         }
 
         return workingDirectory;
     }
 
+    public int getThreaNum() {
+        return threaNum;
+    }
 
+    public void setThreaNum(int threaNum) {
+        this.threaNum = threaNum;
+    }
+
+    public int getTransferFileType() {
+        return transferFileType;
+    }
+
+    public void setTransferFileType(int transferFileType) {
+        this.transferFileType = transferFileType;
+    }
+
+    public int getRetryTimes() {
+        return retryTimes;
+    }
+
+    public void setRetryTimes(int retryTimes) {
+        this.retryTimes = retryTimes;
+    }
+
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("FTPFigureBedConfigStorage{");
+        sb.append("hostname='").append(hostname).append('\'');
+        sb.append(", port=").append(port);
+        sb.append(", userName='").append(userName).append('\'');
+        sb.append(", password='").append(password).append('\'');
+        sb.append(", encoding='").append(encoding).append('\'');
+        sb.append(", workingDirectory='").append(workingDirectory).append('\'');
+        sb.append(", accessAddress='").append(accessAddress).append('\'');
+        sb.append(", passiveMode=").append(passiveMode);
+        sb.append(", clientTimeout=").append(clientTimeout);
+        sb.append(", threaNum=").append(threaNum);
+        sb.append(", transferFileType=").append(transferFileType);
+        sb.append(", retryTimes=").append(retryTimes);
+        sb.append(", bufferSize=").append(bufferSize);
+        sb.append('}');
+        return sb.toString();
+    }
 }

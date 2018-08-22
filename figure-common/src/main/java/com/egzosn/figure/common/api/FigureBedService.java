@@ -56,4 +56,5 @@ public interface FigureBedService {
      */
     ProcessingResults delete(BaseResourceInfo body);
 
+
 }
