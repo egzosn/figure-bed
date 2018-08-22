@@ -143,7 +143,10 @@ public class FTPPoolFigureBedService implements FigureBedService {
      * @return 处理结果
      */
     public ProcessingResults store(ResourceInfo body) {
-        return getFigureBedService().store(body);
+        FTPFigureBedService figureBedService = getFigureBedService();
+        ProcessingResults results = figureBedService.store(body);
+        pool.returnObject(figureBedService);
+        return results;
     }
 
 
@@ -162,7 +165,10 @@ public class FTPPoolFigureBedService implements FigureBedService {
      * </code>
      */
     public boolean exists(BaseResourceInfo body) {
-        return getFigureBedService().exists(body);
+        FTPFigureBedService figureBedService = getFigureBedService();
+        boolean flag = figureBedService.exists(body);
+        pool.returnObject(figureBedService);
+        return flag;
 
     }
 
@@ -174,7 +180,11 @@ public class FTPPoolFigureBedService implements FigureBedService {
      * @return 资源文件
      */
     public ProcessingResults retrieveResource(BaseResourceInfo body) {
-        return getFigureBedService().retrieveResource(body);
+        FTPFigureBedService figureBedService = getFigureBedService();
+
+        ProcessingResults results = figureBedService.retrieveResource(body);
+        pool.returnObject(figureBedService);
+        return results;
     }
 
     /**
@@ -184,7 +194,10 @@ public class FTPPoolFigureBedService implements FigureBedService {
      * @return 处理结果
      */
     public ProcessingResults delete(BaseResourceInfo body) {
-        return getFigureBedService().delete(body);
+        FTPFigureBedService figureBedService = getFigureBedService();
+        ProcessingResults results = figureBedService.delete(body);
+        pool.returnObject(figureBedService);
+        return results;
     }
 
 
