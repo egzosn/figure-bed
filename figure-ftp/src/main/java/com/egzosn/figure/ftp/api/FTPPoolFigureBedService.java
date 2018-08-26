@@ -33,23 +33,56 @@ public class FTPPoolFigureBedService implements FigureBedService {
     private static final ThreadLocal<FTPFigureBedService> THREAD_LOCAL = new ThreadLocal<FTPFigureBedService>();
 
 
-
-
+    /**
+     *
+     * @param poolConfig 连接池配置
+     * @param configStorage FTP账户配置
+     */
     public FTPPoolFigureBedService(GenericObjectPoolConfig poolConfig, FigureBedConfigStorage configStorage) {
         // 初始化对象池
         pool = new GenericObjectPool<FTPFigureBedService>(new FTPPoolFigureBedFactory(configStorage), poolConfig);
     }
 
 
+    /**
+     * properties 文件中获取
+     * @param poolConfig 连接池配置
+     * @param configStorage FTP账户配置
+     */
+    public FTPPoolFigureBedService(InputStream poolConfig, FigureBedConfigStorage configStorage) {
+        this( initPoolConfig(getProperties(poolConfig)), configStorage);
+    }
+    /**
+     * properties 文件中获取
+     * @param poolConfig 连接池配置
+     * @param configStorage FTP账户配置
+     */
+    public FTPPoolFigureBedService(GenericObjectPoolConfig poolConfig, InputStream configStorage) {
+        this(poolConfig, initFigureBedConfigStorage(getProperties(configStorage)) );
+    }
+
+
 
     /**
      * properties 文件中获取
-     * @param properties properties
+     * @param properties 属性文件
      */
     public FTPPoolFigureBedService(InputStream properties) {
+        Properties pro = getProperties(properties);
+        // 初始化对象池
+        pool = new GenericObjectPool<FTPFigureBedService>(new FTPPoolFigureBedFactory(initFigureBedConfigStorage(pro)), initPoolConfig(pro));
+    }
+
+    /**
+     * 配置文件转化为属性对象
+     * @param properties 属性文件
+     * @return 属性对象
+     */
+    private final static Properties getProperties(InputStream properties){
         Properties pro = new Properties();
         try {
             pro.load(properties);
+            return pro;
         } catch (IOException e) {
             throw new FigureException(500, "ftp连接池服务初始化失败,加载配置文件出错", e);
         }finally {
@@ -61,29 +94,36 @@ public class FTPPoolFigureBedService implements FigureBedService {
                 }
             }
         }
-        // 初始化对象池
-        pool = new GenericObjectPool<FTPFigureBedService>(new FTPPoolFigureBedFactory(initFigureBedConfigStorage(pro)), initPoolConfig(pro));
     }
-
 
     /**
      * 通过属性文件进行初始化
      * @param pro 属性文件
      * @return GenericObjectPoolConfig
      */
-    public GenericObjectPoolConfig initPoolConfig(Properties pro){
+    public final static GenericObjectPoolConfig initPoolConfig(Properties pro){
 
         // 初始化对象池配置
         GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-        poolConfig.setBlockWhenExhausted(Boolean.parseBoolean(pro.getProperty("blockWhenExhausted")));
-        poolConfig.setMaxWaitMillis(Long.parseLong(pro.getProperty("maxWait")));
-        poolConfig.setMinIdle(Integer.parseInt(pro.getProperty("minIdle")));
-        poolConfig.setMaxIdle(Integer.parseInt(pro.getProperty("maxIdle")));
+        //#最大数
         poolConfig.setMaxTotal(Integer.parseInt(pro.getProperty("maxTotal")));
+        //最小空闲
+        poolConfig.setMinIdle(Integer.parseInt(pro.getProperty("minIdle")));
+        //最大空闲
+        poolConfig.setMaxIdle(Integer.parseInt(pro.getProperty("maxIdle")));
+        //最大等待时间
+        poolConfig.setMaxWaitMillis(Long.parseLong(pro.getProperty("maxWait")));
+        //池对象耗尽之后是否阻塞,maxWait<0时一直等待
+        poolConfig.setBlockWhenExhausted(Boolean.parseBoolean(pro.getProperty("blockWhenExhausted")));
+        //取对象时验证
         poolConfig.setTestOnBorrow(Boolean.parseBoolean(pro.getProperty("testOnBorrow")));
+        //回收验证
         poolConfig.setTestOnReturn(Boolean.parseBoolean(pro.getProperty("testOnReturn")));
-        poolConfig.setTestOnCreate(Boolean.parseBoolean(pro.getProperty("testOnCreate")));
+        //创建时验证
+//        poolConfig.setTestOnCreate(Boolean.parseBoolean(pro.getProperty("testOnCreate")));
+        //空闲验证
         poolConfig.setTestWhileIdle(Boolean.parseBoolean(pro.getProperty("testWhileIdle")));
+        //后进先出
         poolConfig.setLifo(Boolean.parseBoolean(pro.getProperty("lifo")));
         logger.debug("连接池配置：" + poolConfig.toString());
         return poolConfig;
@@ -93,7 +133,7 @@ public class FTPPoolFigureBedService implements FigureBedService {
      * @param pro 属性文件
      * @return FTPFigureBedConfigStorage
      */
-    public FTPFigureBedConfigStorage initFigureBedConfigStorage(Properties pro){
+    public final static FTPFigureBedConfigStorage initFigureBedConfigStorage(Properties pro){
         FTPFigureBedConfigStorage configStorage=new FTPFigureBedConfigStorage();
         configStorage.setHostname(pro.getProperty("hostname"));
         configStorage.setPort(Integer.parseInt(pro.getProperty("port")));

@@ -100,14 +100,13 @@ public class FTPFigureBedService implements FigureBedService {
      */
     public ProcessingResults store(ResourceInfo body) {
 
-        InputStream in = new ByteArrayInputStream(body.getFile());
         String pathname = configStorage.getDataBase() + body.getPath();
         createDirectory(pathname);
         ftpClient.setDataTimeout(24000);//设置超时时间
         String remote = null;
         try {
             remote = new String(body.getFileName().getBytes(configStorage.getEncoding()), "iso-8859-1");
-            if (ftpClient.storeFile(remote, in)) {
+            if (ftpClient.storeFile(remote, body.getFile())) {
                 logger.debug(body.getFileName() + "上传文件成功！");
                 return ProcessingResults.SUCCESS;
             }
@@ -237,33 +236,12 @@ public class FTPFigureBedService implements FigureBedService {
         boolean success = true;
         String directory = remote.substring(0, remote.lastIndexOf(SEPARATOR) + 1);
         // 如果远程目录不存在，则递归创建远程服务器目录
-        if (!directory.equalsIgnoreCase(SEPARATOR)&& !changeWorkingDirectory(new String(directory))) {
-            int start = directory.startsWith(SEPARATOR) ? 1 : 0;
-            int end = directory.indexOf(SEPARATOR, start);
-            while (true) {
-                String subDirectory = null;
-                try {
-                    subDirectory = new String(remote.substring(start, end).getBytes(configStorage.getEncoding()),"iso-8859-1");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                if (!changeWorkingDirectory(subDirectory)) {
-                  continue;
-                }
-                if (!makeDirectory(subDirectory)) {
-                    logger.debug("创建目录["+subDirectory+"]失败");
-                    success = false;
-                    return success;
-                }
-                changeWorkingDirectory(subDirectory);
-
-                start = end + 1;
-                end = directory.indexOf(SEPARATOR, start);
-                // 检查所有目录是否创建完毕
-                if (end <= start) {
-                    break;
-                }
+        if (!directory.equalsIgnoreCase(SEPARATOR)&& !changeWorkingDirectory(directory)) {
+            if (!makeDirectory(directory)){
+                logger.debug("创建目录["+directory+"]失败");
             }
+            changeWorkingDirectory(directory);
+
         }
         return success;
     }
@@ -281,7 +259,6 @@ public class FTPFigureBedService implements FigureBedService {
 //            return processingResults;
 //        }
 
-        ftpClient.enterLocalActiveMode();
         // 设置文件类型为二进制，与ASCII有区别
         try {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -329,66 +306,4 @@ public class FTPFigureBedService implements FigureBedService {
     }
 
 
-    public static void main(String[] args) {
-        FTPFigureBedConfigStorage configStorage = new FTPFigureBedConfigStorage();
-        configStorage.setHostname("10.45.44.98");
-        configStorage.setPort(21);
-        configStorage.setUserName("egan");
-        configStorage.setPassword("egan");
-        FTPFigureBedService service = new FTPFigureBedService(configStorage);
-//        service.auth();
-
-        BaseResourceInfo resource = new BaseResourceInfo();
-        resource.setPath("data/images/350000/201/35020301000061");
-        resource.setFileName("35020301000061_20180514145859.jpg");
-//        boolean flag = service.exists(resource);
-//        service.listRemoteFiles("");
-        ProcessingResults results = service.retrieveResource(resource);
-        if (SUCCESS.getCode() ==  results.getCode()){
-            savePic((InputStream)results.getData(), resource.getFileName());
-        }
-        resource.setFileName("35020301000061_201805141437461.png");
-         results = service.retrieveResource(resource);
-        if (SUCCESS.getCode() ==  results.getCode()){
-            savePic((InputStream)results.getData(), resource.getFileName());
-        }
-
-
-    }
-    private static void savePic(InputStream inputStream, String fileName) {
-
-        OutputStream os = null;
-        try {
-            String path = "D:\\";
-            // 2、保存到临时文件
-            // 1K的数据缓冲
-            byte[] bs = new byte[1024];
-            // 读取到的数据长度
-            int len;
-            // 输出的文件流保存到本地文件
-
-            File tempFile = new File(path);
-            if (!tempFile.exists()) {
-                tempFile.mkdirs();
-            }
-            os = new FileOutputStream(tempFile.getPath() + File.separator + fileName);
-            // 开始读取
-            while ((len = inputStream.read(bs)) != -1) {
-                os.write(bs, 0, len);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // 完毕，关闭所有链接
-            try {
-                os.close();
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

@@ -1,6 +1,8 @@
 package com.egzosn.figure.common.bean;
 
 
+import java.io.InputStream;
+
 /**
  * 资源信息
  * @author egan
@@ -33,7 +35,7 @@ public class ResourceInfo extends BaseResourceInfo{
     /**
      * 文件信息
      */
-    private byte[] file;
+    private InputStream file;
 
 
     public String getUploadFileName() {
@@ -68,11 +70,11 @@ public class ResourceInfo extends BaseResourceInfo{
         this.contentType = contentType;
     }
 
-    public byte[] getFile() {
+    public InputStream getFile() {
         return file;
     }
 
-    public void setFile(byte[] file) {
+    public void setFile(InputStream file) {
         this.file = file;
     }
 }
